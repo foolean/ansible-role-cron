@@ -1,0 +1,10 @@
+# Copyright (c) 2023, Bennett Samowich <bennett@foolean.org>
+# All rights reserved
+# SPDX short identifier: BSD-3-Clause
+---
+
+# cron_allow_users
+#   List of users that are permitted to run cron or at jobs.
+#   Note: root will always be included
+#   (default: null)
+cron_allow_users: null

@@ -1,0 +1,71 @@
+# Copyright (c) 2023, Bennett Samowich <bennett@foolean.org>
+# All rights reserved
+# SPDX short identifier: BSD-3-Clause
+---
+
+- name: Role foolean/cron
+  block:
+    - name: Ensure cronie is installed
+      become: true
+      ansible.builtin.package:
+        name:
+          - 'cronie'
+        state: present
+
+    - name: CIS | Ensure cron daemon is enabled
+      become: true
+      ansible.builtin.systemd:
+        name: 'crond'
+        masked: false
+        enabled: true
+        state: started
+
+    - name: CIS | Ensure permissions on /etc/crontab are configured
+      become: true
+      ansible.builtin.file:
+        name: '/etc/crontab'
+        owner: 'root'
+        group: 'root'
+        mode: '0600'
+
+    - name: CIS | Ensure permissions on cron hourly, daily, weekly, monthly, and cron.d directorys are configured
+      become: true
+      ansible.builtin.file:
+        name: "{{ item }}"
+        owner: 'root'
+        group: 'root'
+        mode: '0700'
+      with_items:
+        - '/etc/cron.hourly'
+        - '/etc/cron.daily'
+        - '/etc/cron.weekly'
+        - '/etc/cron.monthly'
+        - '/etc/cron.d'
+
+    - name: CIS | Ensure cron is restricted to authorized users
+      become: true
+      ansible.builtin.template:
+        src: 'etc/cron.allow.j2'
+        dest: '/etc/cron.allow'
+        owner: 'root'
+        group: 'root'
+        mode: '0600'
+
+    - name: CIS | Ensure at is restricted to authorized users
+      become: true
+      ansible.builtin.template:
+        src: 'etc/at.allow.j2'
+        dest: '/etc/at.allow'
+        owner: 'root'
+        group: 'root'
+
+    - name: Remove cron.deny and at.deny
+      become: true
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - '/etc/cron.deny'
+        - '/etc/at.deny'
+  tags:
+    - 'role_foolean_cron'

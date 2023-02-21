@@ -1,0 +1,6 @@
+root
+{% if cron_allow_users != None %}
+{% for allowed_user in cron_allow_users|unique|sort %}
+{{ allowed_user }}
+{% endfor %}
+{% endif %}
