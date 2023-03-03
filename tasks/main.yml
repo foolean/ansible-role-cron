@@ -9,17 +9,23 @@
 - name: Role foolean/cron
   block:
 
+    - name: Set OS variables
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      with_first_found:
+        - "{{ ansible_os_family|lower }}.yml"
+        - "default.yml"
+
     - name: Ensure cronie is installed
       become: true
       ansible.builtin.package:
-        name:
-          - 'cronie'
+        name: "{{ cron_packages }}"
         state: present
 
     - name: CIS | Ensure cron daemon is enabled
       become: true
       ansible.builtin.systemd:
-        name: 'crond'
+        name: "{{ cron_service }}"
         masked: false
         enabled: true
         state: started
